@@ -7,7 +7,7 @@ interface Settings {
   bannerText: string;
   loadingText: string;
   whatsappLink: string;
-  telegramUsername: string;
+  whatsappNumber: string;
 
   titleStyle: string;
   backgroundImage: string;
@@ -23,7 +23,7 @@ export default function SettingsManager() {
     bannerText: '',
     loadingText: '',
     whatsappLink: '',
-    telegramUsername: '',
+    whatsappNumber: '',
 
     titleStyle: 'glow',
     backgroundImage: '',
@@ -51,7 +51,7 @@ export default function SettingsManager() {
           bannerText: data.bannerText || '',
           loadingText: data.loadingText || '',
           whatsappLink: data.whatsappLink || data.telegramLink || '',
-          telegramUsername: data.telegramUsername || '',
+          whatsappNumber: data.whatsappNumber || data.telegramUsername?.replace('@', '') || '',
 
           titleStyle: data.titleStyle || 'glow',
           backgroundImage: data.backgroundImage || '',
@@ -243,16 +243,16 @@ export default function SettingsManager() {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Username Telegram (pour les commandes)
+                Numéro WhatsApp (pour les commandes)
               </label>
               <input
                 type="text"
-                value={settings.telegramUsername}
-                onChange={(e) => updateField('telegramUsername', e.target.value)}
+                value={settings.whatsappNumber}
+                onChange={(e) => updateField('whatsappNumber', e.target.value)}
                 className="w-full bg-gray-800 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-white"
-                placeholder="@FreshSwiss"
+                placeholder="33612345678"
               />
-              <p className="text-xs text-gray-400 mt-1">Le @ sera ajouté automatiquement si absent</p>
+              <p className="text-xs text-gray-400 mt-1">Format: code pays + numéro (sans espaces ni tirets)</p>
             </div>
           </div>
         </div>
