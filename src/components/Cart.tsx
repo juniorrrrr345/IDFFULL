@@ -8,18 +8,20 @@ import { toast } from 'react-hot-toast';
 
 export default function Cart() {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clearCart, getTotalPrice } = useCartStore();
-  const [telegramUsername, setTelegramUsername] = useState('@FreshSwiss');
+  const [whatsappNumber, setWhatsappNumber] = useState('33612345678'); // Numéro par défaut
   
   useEffect(() => {
-    // Charger le username Telegram depuis les settings
+    // Charger le numéro WhatsApp depuis les settings
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
-        if (data.telegramUsername) {
-          const username = data.telegramUsername.startsWith('@') 
-            ? data.telegramUsername 
-            : `@${data.telegramUsername}`;
-          setTelegramUsername(username);
+        if (data.whatsappNumber) {
+          // Nettoyer le numéro (enlever espaces, tirets, etc.)
+          const cleanNumber = data.whatsappNumber.replace(/[^0-9]/g, '');
+          setWhatsappNumber(cleanNumber);
+        } else if (data.telegramUsername) {
+          // Fallback sur un numéro WhatsApp par défaut si telegram existe
+          setWhatsappNumber('33612345678');
         }
       })
       .catch(() => {});
@@ -34,40 +36,38 @@ export default function Cart() {
     // Calculer le total
     const total = getTotalPrice();
     
-    // Construire le message
-    let message = `🛒 **DÉTAIL DE LA COMMANDE:**\n\n`;
+    // Construire le message pour WhatsApp (format plus simple)
+    let message = `🛒 *DÉTAIL DE LA COMMANDE:*\n\n`;
     
     items.forEach((item, index) => {
       const itemTotal = item.price * item.quantity;
       
-      message += `${index + 1}. 🍒 ${item.productName}\n`;
-      message += `   • Quantité: ${item.quantity}x ${item.weight}\n`;
-      message += `   • Prix unitaire: ${item.originalPrice}€\n`;
-      message += `   • Total: ${itemTotal.toFixed(2)}€\n`;
+      message += `${index + 1}. ${item.productName}\n`;
+      message += `• Quantité: ${item.quantity}x ${item.weight}\n`;
+      message += `• Prix unitaire: ${item.originalPrice}€\n`;
+      message += `• Total: ${itemTotal.toFixed(2)}€\n`;
       
       if (item.discount > 0) {
-        message += `   • Remise: -${item.discount}%\n`;
+        message += `• Remise: -${item.discount}%\n`;
       }
       
       message += '\n';
     });
     
-    message += `💰 **TOTAL: ${total.toFixed(2)}€**`;
+    message += `💰 *TOTAL: ${total.toFixed(2)}€*\n\n`;
+    message += `📍 Livraison à convenir`;
     
     // Encoder le message pour l'URL
     const encodedMessage = encodeURIComponent(message);
     
-    // Retirer le @ du username s'il est présent
-    const cleanUsername = telegramUsername.replace('@', '');
-    
-    // Ouvrir Telegram avec le message pré-rempli
-    const telegramUrl = `https://t.me/${cleanUsername}?text=${encodedMessage}`;
+    // Créer l'URL WhatsApp
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
     
     // Ouvrir dans une nouvelle fenêtre
-    window.open(telegramUrl, '_blank');
+    window.open(whatsappUrl, '_blank');
     
     // Afficher un message de succès
-    toast.success('Redirection vers Telegram...');
+    toast.success('Redirection vers WhatsApp...');
     
     // Optionnel : vider le panier après un délai
     setTimeout(() => {
@@ -183,9 +183,12 @@ export default function Cart() {
               
               <button
                 onClick={handleSendOrder}
-                className="w-full rounded-lg bg-gradient-to-r from-blue-500 to-green-500 py-3 font-medium text-white hover:from-blue-600 hover:to-green-600 transition-all"
+                className="w-full rounded-lg bg-gradient-to-r from-green-500 to-green-600 py-3 font-medium text-white hover:from-green-600 hover:to-green-700 transition-all flex items-center justify-center gap-2"
               >
-                {`Envoyer à ${telegramUsername}`}
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                Commander via WhatsApp
               </button>
               
               <button
