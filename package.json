@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "node bot-webhook-production.js",
+    "start": "node bot-webhook-fixed.js",
     "start:nextjs": "next start",
     "lint": "next lint",
     "setup-new-shop": "node scripts/duplicate-setup.js",
