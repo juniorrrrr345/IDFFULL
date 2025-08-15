@@ -791,17 +791,17 @@ bot.on('callback_query', async (callbackQuery) => {
                 
                 // Créer le contenu du fichier avec des statistiques
                 const exportDate = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
-                const totalUsers = users.size;
-                const totalAdmins = admins.size;
-                const regularUsers = totalUsers - totalAdmins;
+                const totalUsersCount = users.size;
+                const totalAdminsCount = admins.size;
+                const regularUsersCount = totalUsersCount - totalAdminsCount;
                 
                 const fileContent = `📊 EXPORT DES UTILISATEURS DU BOT\n` +
                     `📅 Date d'export: ${exportDate}\n` +
                     `============================\n\n` +
                     `STATISTIQUES:\n` +
-                    `- Total utilisateurs: ${totalUsers}\n` +
-                    `- Utilisateurs réguliers: ${regularUsers}\n` +
-                    `- Administrateurs: ${totalAdmins}\n` +
+                    `- Total utilisateurs: ${totalUsersCount}\n` +
+                    `- Utilisateurs réguliers: ${regularUsersCount}\n` +
+                    `- Administrateurs: ${totalAdminsCount}\n` +
                     `============================\n\n` +
                     `LISTE DÉTAILLÉE:\n\n` +
                     usersDetails.join('\n\n');
@@ -810,9 +810,9 @@ bot.on('callback_query', async (callbackQuery) => {
                 await bot.sendDocument(chatId, Buffer.from(fileContent, 'utf-8'), {
                     filename: `users_export_${new Date().toISOString().split('T')[0]}.txt`,
                     caption: `📥 **Export complet des utilisateurs**\n\n` +
-                             `📊 Total: ${totalUsers} utilisateurs\n` +
-                             `👤 Réguliers: ${regularUsers}\n` +
-                             `👑 Admins: ${totalAdmins}`
+                             `📊 Total: ${totalUsersCount} utilisateurs\n` +
+                             `👤 Réguliers: ${regularUsersCount}\n` +
+                             `👑 Admins: ${totalAdminsCount}`
                 }, {
                     parse_mode: 'Markdown'
                 });
