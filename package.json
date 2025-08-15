@@ -5,16 +5,18 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "node bot-complete.js",
+    "start": "node bot-webhook-production.js",
     "start:nextjs": "next start",
     "lint": "next lint",
     "setup-new-shop": "node scripts/duplicate-setup.js",
     "bot": "node bot-complete.js",
     "bot:dev": "node bot.js",
     "bot:mongodb": "node bot-mongodb.js",
-    "bot:webhook": "node bot-webhook.js"
+    "bot:webhook": "node bot-webhook.js",
+    "bot:production": "node bot-webhook-production.js"
   },
   "dependencies": {
+    "axios": "^1.11.0",
     "cloudinary": "^2.7.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
