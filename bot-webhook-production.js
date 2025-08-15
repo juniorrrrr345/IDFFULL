@@ -3,6 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const express = require('express');
 const mongoose = require('mongoose');
 const axios = require('axios');
+const fs = require('fs-extra');
 const { loadConfig, saveConfig, getImagePath } = require('./config');
 const { getMainKeyboard, getAdminKeyboard, getSocialManageKeyboard, getSocialLayoutKeyboard, getConfirmKeyboard } = require('./keyboards');
 const { User } = require('./models');
@@ -183,7 +184,10 @@ app.get('/webhook-info', async (req, res) => {
 // État des utilisateurs et configuration
 const userStates = {};
 const activeMessages = {};
+const users = new Set();
+const admins = new Set([parseInt(process.env.ADMIN_ID)]);
 let config = {};
+const botStartTime = new Date();
 
 // Système de keep-alive automatique
 let keepAliveInterval;
