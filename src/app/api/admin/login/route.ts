@@ -4,9 +4,19 @@ export async function POST(request: Request) {
   try {
     const { password } = await request.json();
     
-    // Vérifier le mot de passe (en production, utiliser un hash)
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    // Récupérer le mot de passe depuis les variables d'environnement
+    const adminPassword = process.env.ADMIN_PASSWORD;
     
+    // Vérifier que la variable d'environnement est définie
+    if (!adminPassword) {
+      console.error('ERREUR: La variable ADMIN_PASSWORD n\'est pas définie dans les variables d\'environnement');
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Configuration serveur incorrecte. Veuillez contacter l\'administrateur.' 
+      }, { status: 500 });
+    }
+    
+    // Vérifier le mot de passe
     if (password === adminPassword) {
       return NextResponse.json({ success: true, message: 'Connexion réussie' });
     } else {
