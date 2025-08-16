@@ -7,6 +7,11 @@ export async function POST(request: Request) {
     // Récupérer le mot de passe depuis les variables d'environnement
     const adminPassword = process.env.ADMIN_PASSWORD;
     
+    // Log pour diagnostic (à retirer en production)
+    console.log('ADMIN_PASSWORD est défini:', !!adminPassword);
+    console.log('Environnement:', process.env.NODE_ENV);
+    console.log('Vercel env:', process.env.VERCEL_ENV);
+    
     // Vérifier que la variable d'environnement est définie
     if (!adminPassword) {
       console.error('ERREUR: La variable ADMIN_PASSWORD n\'est pas définie dans les variables d\'environnement');
