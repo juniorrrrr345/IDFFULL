@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { MongoClient, Db } from 'mongodb';
 
-// URI MongoDB Atlas - Utilise la variable d'environnement
+// URI MongoDB Atlas - Utilise la variable d'environnement ou votre URI
 const MONGODB_URI = process.env.MONGODB_URI || 
   'mongodb+srv://idffulloption:Junior30@cluster0.wdopvu5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
