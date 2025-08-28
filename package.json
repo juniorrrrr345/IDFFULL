@@ -13,6 +13,8 @@
     "bot:dev": "node bot.js",
     "bot:mongodb": "node bot-mongodb.js",
     "bot:webhook": "node bot-webhook.js",
+    "monitor:connections": "node scripts/monitor-connections.js",
+    "fix:connections": "node scripts/fix-connections.js",
     "bot:production": "node bot-webhook-production.js"
   },
   "dependencies": {
