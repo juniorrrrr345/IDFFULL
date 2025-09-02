@@ -5,10 +5,12 @@ import { useCartStore } from '@/lib/cartStore';
 import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import OrderDetails from './OrderDetails';
 
 export default function Cart() {
   const { items, isOpen, setIsOpen, updateQuantity, removeItem, clearCart, getTotalPrice } = useCartStore();
   const [whatsappNumber, setWhatsappNumber] = useState('33612345678'); // Numéro par défaut
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
   
   useEffect(() => {
     // Charger le numéro WhatsApp depuis les settings
@@ -27,7 +29,15 @@ export default function Cart() {
       .catch(() => {});
   }, []);
   
-  const handleSendOrder = async () => {
+  const handleShowOrderDetails = () => {
+    if (items.length === 0) {
+      toast.error('Votre panier est vide');
+      return;
+    }
+    setShowOrderDetails(true);
+  };
+  
+  const handleConfirmOrder = async () => {
     if (items.length === 0) {
       toast.error('Votre panier est vide');
       return;
@@ -35,36 +45,73 @@ export default function Cart() {
     
     // Calculer le total
     const total = getTotalPrice();
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+    const currentDate = new Date().toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
     
-    // Construire le message pour WhatsApp (format plus simple)
-    let message = `🛒 *DÉTAIL DE LA COMMANDE:*\n\n`;
+    // Construire le message amélioré avec emojis et séparateurs
+    let message = `🛒 *NOUVELLE COMMANDE*\n`;
+    message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    message += `📊 *RÉSUMÉ:*\n`;
+    message += `• ${totalItems} article${totalItems > 1 ? 's' : ''} commandé${totalItems > 1 ? 's' : ''}\n`;
+    message += `• Total: *${total.toFixed(2)}€*\n\n`;
+    
+    message += `📝 *DÉTAIL DES ARTICLES:*\n`;
+    message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
     
     items.forEach((item, index) => {
       const itemTotal = item.price * item.quantity;
       
-      message += `${index + 1}. ${item.productName}\n`;
-      message += `• Quantité: ${item.quantity}x ${item.weight}\n`;
-      message += `• Prix unitaire: ${item.originalPrice}€\n`;
-      message += `• Total: ${itemTotal.toFixed(2)}€\n`;
+      message += `${index + 1}️⃣ *${item.productName}*\n`;
+      message += `   📦 Poids: ${item.weight}\n`;
+      message += `   🔢 Quantité: ${item.quantity}\n`;
+      message += `   💵 Prix unitaire: ${item.originalPrice}€`;
       
       if (item.discount > 0) {
-        message += `• Remise: -${item.discount}%\n`;
+        message += ` (Remise: -${item.discount}%)`;
       }
       
-      message += '\n';
+      message += `\n   💰 Sous-total: *${itemTotal.toFixed(2)}€*\n\n`;
     });
     
-    message += `💰 *TOTAL: ${total.toFixed(2)}€*\n\n`;
-    message += `📍 Livraison à convenir`;
+    message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    message += `💰 *TOTAL FINAL: ${total.toFixed(2)}€*\n`;
+    message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    message += `📍 *LIVRAISON:* À convenir\n`;
+    message += `📞 *CONTACT:* Merci de confirmer cette commande\n\n`;
+    
+    message += `🕐 *Commande passée le:* ${currentDate}`;
     
     // Encoder le message pour l'URL
     const encodedMessage = encodeURIComponent(message);
     
-    // Créer l'URL WhatsApp
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    // Détecter si c'est WhatsApp ou Telegram et créer l'URL appropriée
+    let orderUrl;
+    if (whatsappNumber && whatsappNumber !== '33612345678') {
+      orderUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    } else {
+      // Fallback vers Telegram si configuré
+      orderUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    }
+    
+    // Copier le message dans le presse-papiers comme backup
+    try {
+      await navigator.clipboard.writeText(message.replace(/\\n/g, '\n'));
+      toast.success('Message copié dans le presse-papiers!');
+    } catch (err) {
+      console.log('Clipboard not available');
+    }
     
     // Ouvrir dans une nouvelle fenêtre
-    window.open(whatsappUrl, '_blank');
+    window.open(orderUrl, '_blank');
     
     // Afficher un message de succès
     toast.success('Redirection vers WhatsApp...');
@@ -73,6 +120,7 @@ export default function Cart() {
     setTimeout(() => {
       clearCart();
       setIsOpen(false);
+      setShowOrderDetails(false);
     }, 2000);
   };
   
@@ -182,7 +230,7 @@ export default function Cart() {
               </div>
               
               <button
-                onClick={handleSendOrder}
+                onClick={handleShowOrderDetails}
                 className="w-full rounded-lg bg-gradient-to-r from-green-500 to-green-600 py-3 font-medium text-white hover:from-green-600 hover:to-green-700 transition-all flex items-center justify-center gap-2"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -201,6 +249,16 @@ export default function Cart() {
           )}
         </div>
       </div>
+      
+      {/* Order Details Modal */}
+      <OrderDetails
+        isOpen={showOrderDetails}
+        onClose={() => setShowOrderDetails(false)}
+        items={items}
+        totalPrice={total}
+        orderLink={""}
+        onConfirmOrder={handleConfirmOrder}
+      />
     </div>
   );
 }
